@@ -503,10 +503,10 @@ FAQ
        Did you remember to use setSensitivity()?
 **/
 
-class Camera{
+class EulerCamera{
 
 public:
-	Camera(vec3 pos, vec3 f, vec3 u, GLfloat y, GLfloat p, GLfloat r);
+	EulerCamera(vec3 pos, vec3 f, vec3 u, GLfloat y, GLfloat p, GLfloat r);
 	void setSensitivity(GLfloat value);
 	inline void changeFront(GLfloat pi, GLfloat ya, GLfloat ro);
 	void movForward(GLfloat value);
@@ -524,7 +524,7 @@ private:
 	GLfloat yaw, pitch, roll, sensitivity, degrees;
 };
 
-Camera::Camera(vec3 pos, vec3 f, vec3 u, GLfloat y, GLfloat p, GLfloat r)
+EulerCamera::EulerCamera(vec3 pos, vec3 f, vec3 u, GLfloat y, GLfloat p, GLfloat r)
 {
 	position = pos;
 	front = f;
@@ -534,7 +534,7 @@ Camera::Camera(vec3 pos, vec3 f, vec3 u, GLfloat y, GLfloat p, GLfloat r)
 	roll = r;
 	degrees = 0;
 }
-inline void Camera::changeFront(GLfloat pi, GLfloat ya, GLfloat ro){
+inline void EulerCamera::changeFront(GLfloat pi, GLfloat ya, GLfloat ro){
 	pi *= sensitivity;
 	ya *= sensitivity;
 	ro *= sensitivity;
@@ -562,22 +562,22 @@ inline void Camera::changeFront(GLfloat pi, GLfloat ya, GLfloat ro){
 	//ya = 0;
 	//ro = 0;
 }
-void Camera::movForward(GLfloat value){ 
+void EulerCamera::movForward(GLfloat value){ 
 	position += front * value / 10.0f;
 }
-void Camera::movRight(GLfloat value){ position += normalise(cross(front, up))*(value / 10.0f); }
-void Camera::move(GLfloat value){ position += vec3(front.v[0] * value / 10.0f, 0.0f, front.v[2] * value / 10.0f); }
-void Camera::setPosition(vec3 value){ position = value; }
-vec3 Camera::getPosition(){ return position; }
-vec3 Camera::getFront(){ return front; }
-void Camera::setFront(vec3 value, GLfloat y, GLfloat p){ 
+void EulerCamera::movRight(GLfloat value){ position += normalise(cross(front, up))*(value / 10.0f); }
+void EulerCamera::move(GLfloat value){ position += vec3(front.v[0] * value / 10.0f, 0.0f, front.v[2] * value / 10.0f); }
+void EulerCamera::setPosition(vec3 value){ position = value; }
+vec3 EulerCamera::getPosition(){ return position; }
+vec3 EulerCamera::getFront(){ return front; }
+void EulerCamera::setFront(vec3 value, GLfloat y, GLfloat p){ 
 	front = normalise(value);
 	yaw = y;
 	pitch = p;
 }
-vec3 Camera::getUp(){ return up; }
-void Camera::setSensitivity(GLfloat value){ sensitivity = value; }
-void Camera::jump(bool& jumping){
+vec3 EulerCamera::getUp(){ return up; }
+void EulerCamera::setSensitivity(GLfloat value){ sensitivity = value; }
+void EulerCamera::jump(bool& jumping){
 	if (jumping)
 	{
 		position += vec3(0.0f, 0.3f*cos(degrees * float(ONE_DEG_IN_RAD)), 0.0f);
@@ -727,8 +727,8 @@ GLuint Shader::CompileShader(char* vertex, char* fragment){
 								DEFINITIONS
 ----------------------------------------------------------------------------*/
 
-void drawObject(GLuint shaderID, mat4 view, mat4 proj, mat4 model, vec3 light, vec3 Ls, vec3 La, vec3 Ld, vec3 Ks, vec3 Ka, vec3 Kd, float exp, Camera cam, Mesh mesh, float coneAngle, vec3 coneDirection, GLenum mode);
-void drawCubeMap(GLuint shaderID, GLuint textureID, mat4 view, mat4 proj, mat4 model, vec3 Ld, vec3 La, Camera cam, Mesh skybox, GLenum mode);
+void drawObject(GLuint shaderID, mat4 view, mat4 proj, mat4 model, vec3 light, vec3 Ls, vec3 La, vec3 Ld, vec3 Ks, vec3 Ka, vec3 Kd, float exp, EulerCamera cam, Mesh mesh, float coneAngle, vec3 coneDirection, GLenum mode);
+void drawCubeMap(GLuint shaderID, GLuint textureID, mat4 view, mat4 proj, mat4 model, vec3 Ld, vec3 La, EulerCamera cam, Mesh skybox, GLenum mode);
 void drawLine(GLuint shaderID, mat4 model, mat4 proj, vec3 origin, vec3 destination, vec3 colour);
 void drawTriangle(GLuint shaderID, mat4 model, mat4 proj, vec3 v1, vec3 v2, vec3 v3, vec3 colour);
 void drawPoint(GLuint shaderID, mat4 model, mat4 proj, vec3 point, vec3 colour);
@@ -738,7 +738,7 @@ void drawPoint(GLuint shaderID, mat4 model, mat4 proj, vec3 point, vec3 colour);
 								IMPLEMENTATIONS
 ----------------------------------------------------------------------------*/
 
-void drawObject(GLuint shaderID, mat4 view, mat4 proj, mat4 model, vec3 light, vec3 Ls, vec3 La, vec3 Ld, vec3 Ks, vec3 Ka, vec3 Kd, float exp, Camera cam, Mesh mesh, float coneAngle, vec3 coneDirection, GLenum mode)
+void drawObject(GLuint shaderID, mat4 view, mat4 proj, mat4 model, vec3 light, vec3 Ls, vec3 La, vec3 Ld, vec3 Ks, vec3 Ka, vec3 Kd, float exp, EulerCamera cam, Mesh mesh, float coneAngle, vec3 coneDirection, GLenum mode)
 {
 
 	//for (int i = 0; i < 6; i++)
@@ -783,7 +783,7 @@ void drawObject(GLuint shaderID, mat4 view, mat4 proj, mat4 model, vec3 light, v
 	//}
 }
 
-void drawCubeMap(GLuint shaderID, GLuint textureID, mat4 view, mat4 proj, mat4 model, vec3 Ld, vec3 La, Camera cam, Mesh skybox, GLenum mode) 
+void drawCubeMap(GLuint shaderID, GLuint textureID, mat4 view, mat4 proj, mat4 model, vec3 Ld, vec3 La, EulerCamera cam, Mesh skybox, GLenum mode) 
 {
 	glDepthMask(GL_FALSE);
 	glUseProgram(shaderID);

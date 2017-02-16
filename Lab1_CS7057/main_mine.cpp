@@ -5,6 +5,7 @@
 #include "Utilities.h"
 #include "Particle.h"
 #include "Collision.h"
+#include "Skeleton.h"
 using namespace std;
 
 const float width = 900, height = 900;
@@ -21,14 +22,24 @@ vec3 triangle[] =
 	vec3(-0.5f, -0.5f, 0.0f)
 };
 
+Mesh cubeID, cubeMapID;
 
 /*----------------------------------------------------------------------------
-								SHADER VARIABLES
+						CAMERA VARIABLES
 ----------------------------------------------------------------------------*/
-GLuint simpleShaderID;
+
+vec3 startingPos = { 0.0f, 0.0f, 10.0f };
+GLfloat pitCam = 0, yawCam = 0, rolCam = 0, frontCam = 0, sideCam = 0, speed = 1;
+float rotateY = 50.0f, rotateLight = 0.0f;
+EulerCamera cam(startingPos, vec3(0.0, 0.0, 1.0), vec3(0.0, 1.0, 0.0), 270.0f, 0.0f, 0.0f);
+
+/*----------------------------------------------------------------------------
+						SHADER VARIABLES
+----------------------------------------------------------------------------*/
+GLuint simpleShaderID, noTextureShaderID, cubeMapShaderID;
 Shader shaderFactory;
 /*----------------------------------------------------------------------------
-							OTHER VARIABLES
+						OTHER VARIABLES
 ----------------------------------------------------------------------------*/
 
 const char* atlas_image = "../freemono.png";
@@ -36,6 +47,7 @@ const char* atlas_meta = "../freemono.meta";
 
 float fontSize = 25.0f;
 int textID = -1;
+Skeleton skeleton;
 /*----------------------------------------------------------------------------
 						FUNCTION DEFINITIONS
 ----------------------------------------------------------------------------*/
@@ -53,12 +65,15 @@ void init()
 		exit(1);
 	}
 	simpleShaderID = shaderFactory.CompileShader(SIMPLE_VERT, SIMPLE_FRAG);
+	noTextureShaderID = shaderFactory.CompileShader(NOTEXTURE_VERT, NOTEXTURE_FRAG);
+	cubeMapShaderID = shaderFactory.CompileShader(SKY_VERT, SKY_FRAG);
+	skeleton = Skeleton(cubeID);
 }
 
 void display() 
 {
-	mat4 proj = identity_mat4();
-	mat4 view = identity_mat4();
+	mat4 proj = perspective(87.0, width/height, 1, 1000.0);
+	mat4 view = look_at(cam.getPosition(), cam.getPosition() + cam.getFront(), cam.getUp());
 	glViewport(0, 0, width, height);
 	drawloop(view, proj, 0);
 	draw_texts();
@@ -167,52 +182,24 @@ void drawloop(mat4 view, mat4 proj, GLuint framebuffer)
 	glEnable(GL_DEPTH_TEST);								// enable depth-testing
 	glDepthFunc(GL_LESS);									// depth-testing interprets a smaller value as "closer"
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		// Clear the color and buffer bits to make a clean slate
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);					//Create a background
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);					//Create a background	
 
-	drawLine(simpleShaderID, identity_mat4(), identity_mat4(), mouseLocation, closestPoint, PURPLE);
-	
-	//Check whether the mouse is within the triangle face
+															// light properties
+	vec3 Ls = vec3(0.0001f, 0.0001f, 0.0001f);	//Specular Reflected Light
+	vec3 Ld = vec3(0.5f, 0.5f, 0.5f);	//Diffuse Surface Reflectance
+	vec3 La = vec3(1.0f, 1.0f, 1.0f);	//Ambient Reflected Light
+	vec3 light = vec3(5.0f, 10, -5.0f);//light source location
+	vec3 coneDirection = light + vec3(0.0f, -1.0f, 0.0f);
+	float coneAngle = 10.0f;
+	// object colour
+	vec3 Ks = vec3(0.1f, 0.1f, 0.1f); // specular reflectance
+	vec3 Kd = BLUE;
+	vec3 Ka = BLUE; // ambient reflectance
+	float specular_exponent = 0.000000005f; //specular exponent - size of the specular elements
 
-	if (closestPoint == mouseLocation)
-		drawTriangle(simpleShaderID, identity_mat4(), identity_mat4(), triangle[0], triangle[1], triangle[2], PURPLE);
-	else
-		drawTriangle(simpleShaderID, identity_mat4(), identity_mat4(), triangle[0], triangle[1], triangle[2], YELLOW);
+	mat4 model = identity_mat4();
 
-	vec3 v12 = normalise(triangle[0] - triangle[1]);
-	vec3 v23 = normalise(triangle[1] - triangle[2]);
-	vec3 v31 = normalise(triangle[2] - triangle[0]);
-
-	//First, check that the closest point isn't a vertice, then check whether its on an edge
-
-	if (closestPoint != triangle[0] && closestPoint != triangle[1] && closestPoint != triangle[2] && closestPoint != mouseLocation)
-	{
-		//<p1, p2>
-		if (dot(normalise(triangle[0] - closestPoint), v12) >= 0.9999)
-			drawTriangle(simpleShaderID, identity_mat4(), identity_mat4(), triangle[0], triangle[1], mouseLocation, PURPLE);
-		//<p2, p3>
-		if (dot(normalise(triangle[1] - closestPoint), v23) >= 0.9999)
-			drawTriangle(simpleShaderID, identity_mat4(), identity_mat4(), triangle[1], triangle[2], mouseLocation, PURPLE);
-		//<p3, p1>
-		if (dot(normalise(triangle[2] - closestPoint), v31) >= 0.9999)
-			drawTriangle(simpleShaderID, identity_mat4(), identity_mat4(), triangle[2], triangle[0], mouseLocation, PURPLE);
-	}
-
-	string text;
-	text += "P1 = [" + to_string(triangle[0].v[0]) + "," + to_string(triangle[0].v[1]) + "," + to_string(triangle[0].v[2]) + "]\n";
-	text += "P2 = [" + to_string(triangle[1].v[0]) + "," + to_string(triangle[1].v[1]) + "," + to_string(triangle[1].v[2]) + "]\n";
-	text += "P3 = [" + to_string(triangle[2].v[0]) + "," + to_string(triangle[2].v[1]) + "," + to_string(triangle[2].v[2]) + "]\n";
-	text += "Distance = " + to_string(getDistance(mouseLocation, closestPoint)) + "\n";
-	text += "v12 = [" + to_string(v12.v[0]) + "," + to_string(v12.v[1]) + "," + to_string(v12.v[2]) + "]\n";
-	text += "v23 = [" + to_string(v23.v[0]) + "," + to_string(v23.v[1]) + "," + to_string(v23.v[2]) + "]\n";
-	text += "v31 = [" + to_string(v31.v[0]) + "," + to_string(v31.v[1]) + "," + to_string(v31.v[2]) + "]\n";
-	text += "dot(p0,v12) = " + to_string(dot(normalise(triangle[0] - closestPoint), v12)) + "\n";
-	text += "dot(p0,v23) = " + to_string(dot(normalise(triangle[1] - closestPoint), v23)) + "\n";
-	text += "dot(p0,v31) = " + to_string(dot(normalise(triangle[2] - closestPoint), v31)) + "\n";
-	update_text(textID, text.c_str());
-
-
-	
-	
+	drawCubeMap(cubeMapShaderID, cubeMapID.tex, view, proj, model, vec3(1.0, 1.0, 1.0), vec3(1.0, 1.0, 1.0), cam, cubeMapID, GL_TRIANGLES);
 }
 
 void rotateTriangle(float degrees)

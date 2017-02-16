@@ -1,17 +1,4 @@
 ﻿C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppBuild.targets(392,5): warning MSB8028: The intermediate directory (Debug\) contains files shared from another project (Lab1_CS7057.vcxproj, Lab2_CS7055.vcxproj, Lab3_CS7055.vcxproj).  This can lead to incorrect clean and rebuild behavior.
-  text.cpp
-u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\text.cpp(78): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\text.cpp(272): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\text.cpp(273): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\text.cpp(302): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\text.cpp(304): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\text.cpp(305): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\text.cpp(306): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\text.cpp(308): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\text.cpp(309): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\text.cpp(310): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\text.cpp(311): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\text.cpp(313): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
   main_mine.cpp
 u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\antons_maths_funcs.h(409): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
 u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\antons_maths_funcs.h(460): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
@@ -56,11 +43,13 @@ u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\particle.h(53): wa
 u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\particle.h(239): warning C4244: 'initializing': conversion from 'double' to 'GLfloat', possible loss of data
 u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\particle.h(300): warning C4305: 'initializing': truncation from 'double' to 'float'
 u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\particle.h(305): warning C4305: 'argument': truncation from 'double' to 'float'
-u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\main_mine.cpp(50): warning C4244: 'argument': conversion from 'const float' to 'int', possible loss of data
-u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\main_mine.cpp(62): warning C4244: 'argument': conversion from 'const float' to 'GLsizei', possible loss of data
-u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\main_mine.cpp(131): warning C4244: 'argument': conversion from 'const float' to 'int', possible loss of data
-u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\main_mine.cpp(137): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\main_mine.cpp(158): warning C4305: 'argument': truncation from 'double' to 'float'
-  Generating Code...
+u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\skeleton.h(38): warning C4018: '<': signed/unsigned mismatch
+u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\skeleton.h(50): warning C4018: '<': signed/unsigned mismatch
+u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\skeleton.h(83): warning C4018: '<': signed/unsigned mismatch
+u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\main_mine.cpp(62): warning C4244: 'argument': conversion from 'const float' to 'int', possible loss of data
+u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\main_mine.cpp(77): warning C4244: 'argument': conversion from 'const float' to 'GLsizei', possible loss of data
+u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\main_mine.cpp(146): warning C4244: 'argument': conversion from 'const float' to 'int', possible loss of data
+u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\main_mine.cpp(152): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\main_mine.cpp(173): warning C4305: 'argument': truncation from 'double' to 'float'
   Lab1_CS7057.vcxproj -> U:\Animation Labs\Realtime-Animation -Lab3_CS7033\Debug\Lab3.exe
   Lab1_CS7057.vcxproj -> U:\Animation Labs\Realtime-Animation -Lab3_CS7033\Debug\Lab3.pdb (Full PDB)
