@@ -24,14 +24,12 @@ using namespace std;
 
 #define DEFAULT_VERT	"../Shaders/simpleVertexShader.txt"
 #define DEFAULT_FRAG	"../Shaders/simpleFragmentShader.txt"
-
 #define CUBEMAP_RIGHT	"-posx.png"
 #define CUBEMAP_LEFT	"-negx.png"
 #define CUBEMAP_TOP		"-posy.png"
 #define CUBEMAP_BOT		"-negy.png"
 #define CUBEMAP_FRONT	"-posz.png"
 #define CUBEMAP_BACK	"-negz.png"
-
 #define TEXTURE_FOLDER "../Textures/"
 
 #pragma region FRAMEBUFFER
@@ -138,15 +136,17 @@ public:
 	void initCubeMap(GLfloat vertices[], int num_vertices, string texture);
 	void Mesh::loadCubeFace(GLuint textureID, GLenum side, const char* filename);
 	bool Mesh::update_mesh(mat4 orientation, vec3 position);
+	bool Mesh::scale_mesh(GLfloat scale);
 	GLuint VAO[20], tex, norm;
 	int mesh_vertex_count;
 
 
 	vector<GLfloat> newpoints; // array of vertex points
 	vector<GLfloat> newnormals; // array of vertex normals
+
+	vector<GLfloat> initialpoints;
+	vector<GLfloat> initialnormals;
 };
-
-
 
 Mesh::Mesh(){}
 
@@ -179,6 +179,13 @@ void Mesh::initCubeMap(GLfloat vertices[], int num_vertices, string texture)
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 6 * num_vertices, vertices, GL_STATIC_DRAW);
+
+	for (int i = 0; i < num_vertices * 6; i+=6)
+	{
+		newpoints.push_back(vertices[i]);
+		newpoints.push_back(vertices[i+1]);
+		newpoints.push_back(vertices[i+2]);
+	}
 
 	glBindVertexArray(VAO[0]);
 	// Position attribute
@@ -273,6 +280,7 @@ bool Mesh::load_mesh(const char* file_name)
 				newpoints.push_back(points[i * 3 + 1]);
 				newpoints.push_back(points[i * 3 + 2]);
 			}
+			initialpoints = newpoints;
 		}
 		if (mesh->HasNormals())
 		{
@@ -287,6 +295,7 @@ bool Mesh::load_mesh(const char* file_name)
 				newnormals.push_back(normals[i * 3 + 1]);
 				newnormals.push_back(normals[i * 3 + 2]);
 			}
+			initialnormals = newnormals;
 		}
 		if (mesh->HasTextureCoords(0))
 		{
@@ -388,15 +397,13 @@ bool Mesh::update_mesh(mat4 orientation, vec3 position)
 {
 	for (int i = 0; i < mesh_vertex_count; i++)
 	{
-		static vector<GLfloat> initPoints = newpoints;
-		vec3 vertice = vec3(initPoints[i * 3], initPoints[i * 3 + 1], initPoints[i * 3 + 2]);
+		vec3 vertice = vec3(initialpoints[i * 3], initialpoints[i * 3 + 1], initialpoints[i * 3 + 2]);
 		vertice = multiply(orientation, vertice)+position;
 		newpoints[i * 3] = vertice.v[0];
 		newpoints[i * 3 + 1] = vertice.v[1];
 		newpoints[i * 3 + 2] = vertice.v[2];
 
-		static vector<GLfloat> initNormals = newnormals;
-		vertice = vec3(initNormals[i * 3], initNormals[i * 3 + 1], initNormals[i * 3 + 2]);
+		vertice = vec3(initialnormals[i * 3], initialnormals[i * 3 + 1], initialnormals[i * 3 + 2]);
 		vertice = multiply(orientation, vertice)+position;
 		newnormals[i * 3] = vertice.v[0];
 		newnormals[i * 3 + 1] = vertice.v[1];
@@ -407,6 +414,45 @@ bool Mesh::update_mesh(mat4 orientation, vec3 position)
 
 	glBindVertexArray(VAO[0]);
 /* copy mesh data into VBOs */
+	GLuint vbo;
+	glGenBuffers(1, &vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, mesh_vertex_count * 3 * sizeof(GLfloat), newpoints.data(), GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	glEnableVertexAttribArray(0);
+
+	GLuint vbo2;
+	glGenBuffers(1, &vbo2);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo2);
+	glBufferData(GL_ARRAY_BUFFER, 3 * mesh_vertex_count * sizeof(GLfloat), newnormals.data(), GL_STATIC_DRAW);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	glEnableVertexAttribArray(1);
+
+	return true;
+}
+
+bool Mesh::scale_mesh(GLfloat scale)
+{
+	for (int i = 0; i < mesh_vertex_count; i++)
+	{
+		vec3 vertice = vec3(initialpoints[i * 3], initialpoints[i * 3 + 1], initialpoints[i * 3 + 2]);
+		vertice *= scale;
+		newpoints[i * 3] = vertice.v[0];
+		newpoints[i * 3 + 1] = vertice.v[1];
+		newpoints[i * 3 + 2] = vertice.v[2];
+
+		vertice = vec3(initialnormals[i * 3], initialnormals[i * 3 + 1], initialnormals[i * 3 + 2]);
+		vertice *= scale;
+		vertice = normalise(vertice);
+		newnormals[i * 3] = vertice.v[0];
+		newnormals[i * 3 + 1] = vertice.v[1];
+		newnormals[i * 3 + 2] = vertice.v[2];
+	}
+
+
+
+	glBindVertexArray(VAO[0]);
+	/* copy mesh data into VBOs */
 	GLuint vbo;
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -476,71 +522,78 @@ bool Mesh::load_texture(const char* file_name, GLuint* tex)
 
 #pragma endregion
 
-#pragma region CAMERA
+#pragma region EULER_CAMERA
 /**
-Please Note: This Camera Implementation does not currently Support Movement on the Roll Axis.
-
-Requirements:
+Requirements :
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-In your Init() Function:
-    cam.setSensitivity(<insert sensitivity value here>);
+				 In your Init() Function :
+				 cam.setSensitivity(<insert sensitivity value here>);
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-In your Input Functions:
-    pitCam, yawCam, rolCam - These become 1 to move in the positive direction, and -1 to move in the negative direction. The reset to 0 during the function call.
-    I recommend that they are changed via the mouse input option, in some shape or form. Set rolCam to 0 and never touch it, I didn't finish it yet.
+In your Input Functions :
+pitCam, yawCam, rolCam - These become 1 to move in the positive direction, and -1 to move in the negative direction.The reset to 0 during the function call.
+I recommend that they are changed via the mouse input option, in some shape or form.Set rolCam to 0 and never touch it, I didn't finish it yet.
 
-	frontCam, sideCam - These two become either 1 to go in the positive axis direction, 0 to not move, and -1 to go in the negative axis direction.
-    I recommend that they are changed via the glutKeyboardFunc and glutKeyboardUpFunc, or the GLFW equivalent.
+frontCam, sideCam - These two become either 1 to go in the positive axis direction, 0 to not move, and -1 to go in the negative axis direction.
+I recommend that they are changed via the glutKeyboardFunc and glutKeyboardUpFunc, or the GLFW equivalent.
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 In your UpdateScene() Function:
-    Call to cam.movForward(frontCam), cam.movRight(sideCam), and cam.changeFront(pitCam, yawCam, rolCam);. That's it.
+Call to cam.movForward(frontCam), cam.movRight(sideCam), and cam.changeFront(pitCam, yawCam, rolCam); .That's it.
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 In your display() Function:
-    view = look_at(cam.getPosition(), cam.getPosition() + cam.getFront(), cam.getUp());
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-FAQ
-    Camera doesn't move!
-       Did you remember to use setSensitivity()?
+view = look_at(cam.getPosition(), cam.getPosition() + cam.getFront(), cam.getUp());
 **/
 
-class EulerCamera{
+class EulerCamera {
 
-public:
-	EulerCamera(vec3 pos, vec3 f, vec3 u, GLfloat y, GLfloat p, GLfloat r);
-	void setSensitivity(GLfloat value);
-	inline void changeFront(GLfloat pi, GLfloat ya, GLfloat ro);
-	void movForward(GLfloat value);
-	void movRight(GLfloat value);
-	void setPosition(vec3 value);
-	void setFront(vec3 value, GLfloat y, GLfloat p);
-	vec3 getPosition();
-	vec3 getFront();
-	vec3 getUp();
-	void move(GLfloat value);
-	void jump(bool& jumping);
-	GLuint cam_buffer;
-private:
-	vec3 position, front, up;
-	GLfloat yaw, pitch, roll, sensitivity, degrees;
+	public:
+		EulerCamera(vec3 pos, GLfloat y, GLfloat p, GLfloat r);
+		void setSensitivity(GLfloat value);
+		inline void changeFront(GLfloat pi, GLfloat ya, GLfloat ro);
+		//inline void changeLocalFront(GLfloat pi, GLfloat ya, GLfloat ro);
+		void movForward(GLfloat value);
+		void movRight(GLfloat value);
+		void setPosition(vec3 value);
+		void setFront(vec3 value, GLfloat y, GLfloat p);
+		vec3 getPosition();
+		vec3 getFront();
+		vec3 getUp();
+		void move(GLfloat value);
+		void jump(bool& jumping);
+		GLuint cam_buffer;
+
+		mat4 rot = mat4();
+		GLfloat yaw, pitch, roll;
+	private:
+		vec3 position, front, up, right;
+		GLfloat sensitivity, degrees;
+
+		void changeFront();
+
+		GLfloat initYaw, initPitch, initRoll;
 };
 
-EulerCamera::EulerCamera(vec3 pos, vec3 f, vec3 u, GLfloat y, GLfloat p, GLfloat r)
+EulerCamera::EulerCamera(vec3 pos, GLfloat y, GLfloat p, GLfloat r)
 {
 	position = pos;
-	front = f;
-	up = u;
+	front = vec3(0.0, 0.0, 0.0);
+	right = vec3(0.0, 0.0, 0.0);
 	yaw = y;
 	pitch = p;
 	roll = r;
 	degrees = 0;
+	sensitivity = 2.0f;
+	changeFront();
 }
-inline void EulerCamera::changeFront(GLfloat pi, GLfloat ya, GLfloat ro){
+
+inline void EulerCamera::changeFront(GLfloat pi, GLfloat ya, GLfloat ro) {
+
 	pi *= sensitivity;
 	ya *= sensitivity;
 	ro *= sensitivity;
+
 	pitch += (GLfloat)pi;
 	yaw += (GLfloat)ya;
-	//roll += (GLfloat)ro;		//Ro is not Currently Implemented
+	roll += (GLfloat)ro;
 	if (pitch > 89)
 		pitch = 89;
 	if (pitch < -89)
@@ -549,35 +602,50 @@ inline void EulerCamera::changeFront(GLfloat pi, GLfloat ya, GLfloat ro){
 		yaw = 0;
 	else if (yaw < 0)
 		yaw = 360;
+
+	changeFront();
+
+}
+
+inline void EulerCamera::changeFront()
+{
 	GLfloat rpitch = pitch * GLfloat(ONE_DEG_IN_RAD);
 	GLfloat ryaw = yaw  * GLfloat(ONE_DEG_IN_RAD);
+	GLfloat rroll = roll * GLfloat(ONE_DEG_IN_RAD);
+	GLfloat ninety = 90 * GLfloat(ONE_DEG_IN_RAD);
 
-	vec3 f;
+	vec3 f = vec3();
 	f.v[0] = cos(ryaw) * cos(rpitch);
 	f.v[1] = sin(rpitch);
 	f.v[2] = sin(ryaw) * cos(rpitch);
 	//get direction to look at and normalise it to make it a unit vector
 	front = normalise(f);
-	//pi = 0;
-	//ya = 0;
-	//ro = 0;
+	up = vec3(0.0, 1.0, 0.0);
 }
-void EulerCamera::movForward(GLfloat value){ 
-	position += front * value / 10.0f;
-}
-void EulerCamera::movRight(GLfloat value){ position += normalise(cross(front, up))*(value / 10.0f); }
-void EulerCamera::move(GLfloat value){ position += vec3(front.v[0] * value / 10.0f, 0.0f, front.v[2] * value / 10.0f); }
-void EulerCamera::setPosition(vec3 value){ position = value; }
-vec3 EulerCamera::getPosition(){ return position; }
-vec3 EulerCamera::getFront(){ return front; }
-void EulerCamera::setFront(vec3 value, GLfloat y, GLfloat p){ 
+
+void EulerCamera::movForward(GLfloat value) { position += front * value / 10.0f; }
+
+void EulerCamera::movRight(GLfloat value) { position += normalise(cross(front, up))*(value / 10.0f); }
+
+void EulerCamera::move(GLfloat value) { position += vec3(front.v[0] * value / 10.0f, 0.0f, front.v[2] * value / 10.0f); }
+
+void EulerCamera::setPosition(vec3 value) { position = value; }
+
+vec3 EulerCamera::getPosition() { return position; }
+
+vec3 EulerCamera::getFront() { return front; }
+
+void EulerCamera::setFront(vec3 value, GLfloat y, GLfloat p) {
 	front = normalise(value);
 	yaw = y;
 	pitch = p;
 }
-vec3 EulerCamera::getUp(){ return up; }
-void EulerCamera::setSensitivity(GLfloat value){ sensitivity = value; }
-void EulerCamera::jump(bool& jumping){
+
+vec3 EulerCamera::getUp() { return up; }
+
+void EulerCamera::setSensitivity(GLfloat value) { sensitivity = value; }
+
+void EulerCamera::jump(bool& jumping) {
 	if (jumping)
 	{
 		position += vec3(0.0f, 0.3f*cos(degrees * float(ONE_DEG_IN_RAD)), 0.0f);
@@ -592,6 +660,7 @@ void EulerCamera::jump(bool& jumping){
 	else
 		return;
 }
+
 #pragma endregion
 
 #pragma region SHADER
@@ -733,7 +802,6 @@ void drawLine(GLuint shaderID, mat4 model, mat4 proj, vec3 origin, vec3 destinat
 void drawTriangle(GLuint shaderID, mat4 model, mat4 proj, vec3 v1, vec3 v2, vec3 v3, vec3 colour);
 void drawPoint(GLuint shaderID, mat4 model, mat4 proj, vec3 point, vec3 colour);
 
-
 /*----------------------------------------------------------------------------
 								IMPLEMENTATIONS
 ----------------------------------------------------------------------------*/
@@ -783,7 +851,7 @@ void drawObject(GLuint shaderID, mat4 view, mat4 proj, mat4 model, vec3 light, v
 	//}
 }
 
-void drawCubeMap(GLuint shaderID, GLuint textureID, mat4 view, mat4 proj, mat4 model, vec3 Ld, vec3 La, EulerCamera cam, Mesh skybox, GLenum mode) 
+void drawCubeMap(GLuint shaderID, GLuint textureID, mat4 view, mat4 proj, mat4 model, vec3 Ld, vec3 La, EulerCamera cam, Mesh skybox, GLenum mode)
 {
 	glDepthMask(GL_FALSE);
 	glUseProgram(shaderID);
@@ -875,5 +943,4 @@ void drawPoint(GLuint shaderID, mat4 model, mat4 proj, vec3 point, vec3 colour)
 	glUniformMatrix4fv(glGetUniformLocation(shaderID, "model"), 1, GL_FALSE, model.m);
 	glDrawArrays(GL_POINTS, 0, 1);
 }
-
 #pragma endregion

@@ -12,34 +12,25 @@ const float width = 900, height = 900;
 /*----------------------------------------------------------------------------
 						MESH AND TEXTURE VARIABLES
 ----------------------------------------------------------------------------*/
-vec3 mouseLocation = vec3(0.0f, 0.5f, 0.0f);
-vec3 closestPoint = vec3(0.5f, -0.5f, 0.0f);
 
-vec3 triangle[] =
-{
-	vec3(0.0f, 0.5f, 0.0f),
-	vec3(0.5f, -0.5f, 0.0f),
-	vec3(-0.5f, -0.5f, 0.0f)
-};
-
-Mesh cubeID, cubeMapID;
+Mesh cubeMapID, cubeID;
 
 /*----------------------------------------------------------------------------
-						CAMERA VARIABLES
+							CAMERA VARIABLES
 ----------------------------------------------------------------------------*/
 
 vec3 startingPos = { 0.0f, 0.0f, 10.0f };
 GLfloat pitCam = 0, yawCam = 0, rolCam = 0, frontCam = 0, sideCam = 0, speed = 1;
 float rotateY = 50.0f, rotateLight = 0.0f;
-EulerCamera cam(startingPos, vec3(0.0, 0.0, 1.0), vec3(0.0, 1.0, 0.0), 270.0f, 0.0f, 0.0f);
+EulerCamera cam(startingPos, 270.0f, 0.0f, 0.0f);
 
 /*----------------------------------------------------------------------------
-						SHADER VARIABLES
+								SHADER VARIABLES
 ----------------------------------------------------------------------------*/
 GLuint simpleShaderID, noTextureShaderID, cubeMapShaderID;
 Shader shaderFactory;
 /*----------------------------------------------------------------------------
-						OTHER VARIABLES
+							OTHER VARIABLES
 ----------------------------------------------------------------------------*/
 
 const char* atlas_image = "../freemono.png";
@@ -47,13 +38,14 @@ const char* atlas_meta = "../freemono.meta";
 
 float fontSize = 25.0f;
 int textID = -1;
+bool pause = false;
 Skeleton skeleton;
+
 /*----------------------------------------------------------------------------
 						FUNCTION DEFINITIONS
 ----------------------------------------------------------------------------*/
 
 void drawloop(mat4 view, mat4 proj, GLuint framebuffer);
-void rotateTriangle(float degrees);
 
 /*--------------------------------------------------------------------------*/
 
@@ -67,12 +59,15 @@ void init()
 	simpleShaderID = shaderFactory.CompileShader(SIMPLE_VERT, SIMPLE_FRAG);
 	noTextureShaderID = shaderFactory.CompileShader(NOTEXTURE_VERT, NOTEXTURE_FRAG);
 	cubeMapShaderID = shaderFactory.CompileShader(SKY_VERT, SKY_FRAG);
+
+	cubeMapID.initCubeMap(vertices, 36, "desert");
+	cubeID.init(CUBE_MESH);
 	skeleton = Skeleton(cubeID);
 }
 
 void display() 
 {
-	mat4 proj = perspective(87.0, width/height, 1, 1000.0);
+	mat4 proj = perspective(87.0, (float)width / (float)(height), 1, 1000.0);
 	mat4 view = look_at(cam.getPosition(), cam.getPosition() + cam.getFront(), cam.getUp());
 	glViewport(0, 0, width, height);
 	drawloop(view, proj, 0);
@@ -93,48 +88,141 @@ void updateScene() {
 	float  delta = (curr_time - last_frame) * 0.001f;
 	if (delta >= 0.03f) 
 	{
+		delta = 0.03f;
 		last_frame = curr_time;
 		glutPostRedisplay();
-		rotateTriangle(0.5);
 
-		closestPoint = getClosestPointTriangle(triangle, mouseLocation);
+		cam.movForward(frontCam*speed);
+		cam.movRight(sideCam*speed);
+		cam.changeFront(pitCam, yawCam, rolCam);
+		string output = "EULER_MODE: Front: [" + to_string(cam.getFront().v[0]) + ", " + to_string(cam.getFront().v[1]) + ", " + to_string(cam.getFront().v[2]) + "]\n";
+		output += "Position: [" + to_string(cam.getPosition().v[0]) + ", " + to_string(cam.getPosition().v[1]) + ", " + to_string(cam.getPosition().v[2]) + "]\n";
+		output += "Up: [" + to_string(cam.getUp().v[0]) + ", " + to_string(cam.getUp().v[1]) + ", " + to_string(cam.getUp().v[2]) + "]\n";
+		output += "Pitch: " + to_string(cam.pitch) + "\n";
+		output += "Yaw: " + to_string(cam.yaw) + "\n";
+		output += "Roll: " + to_string(cam.roll) + "\n";
+		update_text(textID, output.c_str());
+		if (!pause)
+		{
 
-		string text;
-		text += "P1 = [" + to_string(triangle[0].v[0]) + "," + to_string(triangle[0].v[1]) + "," + to_string(triangle[0].v[2]) + "]\n";
-		text += "P2 = [" + to_string(triangle[1].v[0]) + "," + to_string(triangle[1].v[1]) + "," + to_string(triangle[1].v[2]) + "]\n";
-		text += "P3 = [" + to_string(triangle[2].v[0]) + "," + to_string(triangle[2].v[1]) + "," + to_string(triangle[2].v[2]) + "]\n";
-		text += "Distance = " + to_string(getDistance(mouseLocation, closestPoint)) + "\n";
-		update_text(textID, text.c_str());
+		}
 	}
 	
 }
 
 #pragma region INPUT FUNCTIONS
 
-void keypress(unsigned char key, int x, int y) 
-{
-	if (key == (char)27)	//Pressing Escape Ends the game
+void keypress(unsigned char key, int x, int y) {
+	switch (key)
 	{
+	case ((char)27):
 		exit(0);
+		break;
+	case('w'):
+	case('W'):
+		frontCam = 1;
+		printf("Moving Forward\n");
+		break;
+	case('s'):
+	case('S'):
+		frontCam = -1;
+		printf("Moving Backward\n");
+		break;
+	case('a'):
+	case('A'):
+		sideCam = -1;
+		printf("Moving Left\n");
+		break;
+	case('d'):
+	case('D'):
+		sideCam = 1;
+		printf("Moving Right\n");
+		break;
+	case('q'):
+	case('Q'):
+		rolCam = -1;
+		printf("Spinning Negative Roll\n");
+		break;
+	case('e'):
+	case('E'):
+		rolCam = 1;
+		printf("Spinning Positive Roll\n");
+		break;
 	}
 }
 
-void keypressUp(unsigned char key, int x, int y)
-{
+void keypressUp(unsigned char key, int x, int y){
+	switch (key)
+	{
+	case('w'):
+	case('W'):
+	case('s'):
+	case('S'):
+		frontCam = 0;
+		break;
+	case('a'):
+	case('A'):
+	case('d'):
+	case('D'):
+		sideCam = 0;
+		break;
+	case('q'):
+	case('Q'):
+	case('e'):
+	case('E'):
+		rolCam = 0;
+		break;
+	case(' '):
+		pause = !pause;
+		break;
+	}
 }
 
-void specialKeypress(int key, int x, int y) 
-{
+void specialKeypress(int key, int x, int y){
+	switch (key)
+	{
+	case (GLUT_KEY_SHIFT_L):
+	case (GLUT_KEY_SHIFT_R):
+		speed = 4;
+		break;
+	case (GLUT_KEY_LEFT):
+		printf("Spinning Negative Yaw\n");
+		yawCam = -1;
+		break;
+	case (GLUT_KEY_RIGHT):
+		printf("Spinning Positive Yaw\n");
+		yawCam = 1;
+		break;
+	case (GLUT_KEY_UP):
+		printf("Spinning Positive Pit\n");
+		pitCam = 1;
+		break;
+	case (GLUT_KEY_DOWN):
+		printf("Spinning Negative Pit\n");
+		pitCam = -1;
+		break;
+	}
 }
 
-void specialKeypressUp(int key, int x, int y) 
-{
+void specialKeypressUp(int key, int x, int y){
+	switch (key)
+	{
+	case (GLUT_KEY_SHIFT_L):
+	case (GLUT_KEY_SHIFT_R):
+		speed = 1;
+		break;
+	case (GLUT_KEY_LEFT):
+	case (GLUT_KEY_RIGHT):
+		yawCam = 0;
+		break;
+	case (GLUT_KEY_UP):
+	case (GLUT_KEY_DOWN):
+		pitCam = 0;
+		break;
+	}
 }
 
-void (mouse)(int x, int y)
-{
-	mouseLocation.v[0] = ((2 / width) * x) - 1;
-	mouseLocation.v[1] = 1 - (((2 / height) * y));
+void (mouse)(int x, int y){
 }
 
 #pragma endregion INPUT FUNCTIONS
@@ -184,11 +272,11 @@ void drawloop(mat4 view, mat4 proj, GLuint framebuffer)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		// Clear the color and buffer bits to make a clean slate
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);					//Create a background	
 
-															// light properties
+	// light properties
 	vec3 Ls = vec3(0.0001f, 0.0001f, 0.0001f);	//Specular Reflected Light
 	vec3 Ld = vec3(0.5f, 0.5f, 0.5f);	//Diffuse Surface Reflectance
 	vec3 La = vec3(1.0f, 1.0f, 1.0f);	//Ambient Reflected Light
-	vec3 light = vec3(5.0f, 10, -5.0f);//light source location
+	vec3 light = vec3(5 * sin(rotateLight), 10, -5.0f*cos(rotateLight));//light source location
 	vec3 coneDirection = light + vec3(0.0f, -1.0f, 0.0f);
 	float coneAngle = 10.0f;
 	// object colour
@@ -200,13 +288,5 @@ void drawloop(mat4 view, mat4 proj, GLuint framebuffer)
 	mat4 model = identity_mat4();
 
 	drawCubeMap(cubeMapShaderID, cubeMapID.tex, view, proj, model, vec3(1.0, 1.0, 1.0), vec3(1.0, 1.0, 1.0), cam, cubeMapID, GL_TRIANGLES);
-}
-
-void rotateTriangle(float degrees)
-{
-	mat4 rotate = rotate_z_deg(identity_mat4(), degrees);
-	for (int i = 0; i < 3; i++)
-	{
-		triangle[i] = multiply(rotate, triangle[i]);
-	}
+	skeleton.drawSkeleton(view, proj, noTextureShaderID, cam);
 }

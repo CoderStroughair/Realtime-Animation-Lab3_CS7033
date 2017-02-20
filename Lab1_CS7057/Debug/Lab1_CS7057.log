@@ -36,20 +36,19 @@ u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\teapot.h(5959): wa
 u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\teapot.h(5959): warning C4305: 'initializing': truncation from 'double' to 'float'
 u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\teapot.h(8938): warning C4838: conversion from 'double' to 'float' requires a narrowing conversion
 u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\teapot.h(8938): warning C4305: 'initializing': truncation from 'double' to 'float'
-u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\utilities.h(241): warning C4018: '<': signed/unsigned mismatch
+u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\utilities.h(248): warning C4018: '<': signed/unsigned mismatch
 u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\particle.h(29): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
 u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\particle.h(33): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
 u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\particle.h(53): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
 u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\particle.h(239): warning C4244: 'initializing': conversion from 'double' to 'GLfloat', possible loss of data
 u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\particle.h(300): warning C4305: 'initializing': truncation from 'double' to 'float'
 u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\particle.h(305): warning C4305: 'argument': truncation from 'double' to 'float'
-u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\skeleton.h(38): warning C4018: '<': signed/unsigned mismatch
-u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\skeleton.h(50): warning C4018: '<': signed/unsigned mismatch
-u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\skeleton.h(83): warning C4018: '<': signed/unsigned mismatch
-u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\main_mine.cpp(62): warning C4244: 'argument': conversion from 'const float' to 'int', possible loss of data
-u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\main_mine.cpp(77): warning C4244: 'argument': conversion from 'const float' to 'GLsizei', possible loss of data
-u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\main_mine.cpp(146): warning C4244: 'argument': conversion from 'const float' to 'int', possible loss of data
-u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\main_mine.cpp(152): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\main_mine.cpp(173): warning C4305: 'argument': truncation from 'double' to 'float'
+u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\skeleton.h(57): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\skeleton.h(66): warning C4305: 'argument': truncation from 'double' to 'float'
+u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\main_mine.cpp(54): warning C4244: 'argument': conversion from 'const float' to 'int', possible loss of data
+u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\main_mine.cpp(72): warning C4244: 'argument': conversion from 'const float' to 'GLsizei', possible loss of data
+u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\main_mine.cpp(234): warning C4244: 'argument': conversion from 'const float' to 'int', possible loss of data
+u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\main_mine.cpp(240): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\main_mine.cpp(261): warning C4305: 'argument': truncation from 'double' to 'float'
   Lab1_CS7057.vcxproj -> U:\Animation Labs\Realtime-Animation -Lab3_CS7033\Debug\Lab3.exe
   Lab1_CS7057.vcxproj -> U:\Animation Labs\Realtime-Animation -Lab3_CS7033\Debug\Lab3.pdb (Full PDB)
