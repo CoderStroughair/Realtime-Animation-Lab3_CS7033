@@ -60,6 +60,7 @@
 #define BUDDHA_MESH		"../Meshes/buddha.dae"
 #define PARTICLE_MESH	"../Meshes/particle.dae"
 #define CUBE_MESH		"../Meshes/cube.obj"
+#define TORUS_MESH		"../Meshes/torus.dae"
 
 
 #define BEAR_TEXTURE	"../Textures/bear.tga"

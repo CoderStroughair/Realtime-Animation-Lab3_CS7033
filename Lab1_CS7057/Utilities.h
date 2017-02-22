@@ -851,6 +851,68 @@ void drawObject(GLuint shaderID, mat4 view, mat4 proj, mat4 model, vec3 light, v
 	//}
 }
 
+void drawObjectDebug(GLuint shaderID, mat4 view, mat4 proj, mat4 model, vec3 light, vec3 Ls, vec3 La, vec3 Ld, vec3 Ks, vec3 Ka, vec3 Kd, float exp, EulerCamera cam, Mesh mesh, float coneAngle, vec3 coneDirection, GLenum mode)
+{
+
+	//for (int i = 0; i < 6; i++)
+	//{
+	glUseProgram(shaderID);
+	glBindVertexArray(mesh.VAO[0]);
+
+	GLuint temp = glGetUniformLocation(shaderID, "Ls");
+	cout << temp << endl;
+	glUniform3fv(temp, 1, Ls.v);
+	temp = glGetUniformLocation(shaderID, "Ld");
+	cout << temp << endl;
+	glUniform3fv(temp, 1, Ld.v);
+	temp = glGetUniformLocation(shaderID, "La");
+	cout << temp << endl;
+	glUniform3fv(temp, 1, La.v);
+	temp = glGetUniformLocation(shaderID, "Ks");
+	cout << temp << endl;
+	glUniform3fv(temp, 1, Ks.v);
+	temp = glGetUniformLocation(shaderID, "Kd");
+	cout << temp << endl;
+	glUniform3fv(temp, 1, Kd.v);
+	temp = glGetUniformLocation(shaderID, "Ka");
+	cout << temp << endl;
+	glUniform3fv(temp, 1, Ka.v);
+	temp = glGetUniformLocation(shaderID, "specular_exponent");
+	cout << temp << endl;
+	glUniform1f(temp, exp);
+	temp = glGetUniformLocation(shaderID, "light");
+	cout << temp << endl;
+	glUniform3fv(temp, 1, light.v);
+	glUniform4fv(glGetUniformLocation(shaderID, "camPos"), 1, cam.getPosition().v);
+	glUniformMatrix4fv(glGetUniformLocation(shaderID, "view"), 1, GL_FALSE, view.m);
+	glUniformMatrix4fv(glGetUniformLocation(shaderID, "proj"), 1, GL_FALSE, proj.m);
+	glUniformMatrix4fv(glGetUniformLocation(shaderID, "model"), 1, GL_FALSE, model.m);
+
+	if (coneAngle != NULL)
+	{
+		glUniform3fv(glGetUniformLocation(shaderID, "coneDirection"), 1, coneDirection.v);
+		glUniform1f(glGetUniformLocation(shaderID, "coneAngle"), coneAngle);
+	}
+
+	if (mesh.tex)
+	{
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, mesh.tex);
+		glUniform1i(glGetUniformLocation(shaderID, "texture_primary"), 0);
+
+	}
+	if (mesh.norm)
+	{
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, mesh.norm);
+		glUniform1i(glGetUniformLocation(shaderID, "normal_map"), 1);
+
+	}
+
+	glDrawArrays(mode, 0, mesh.mesh_vertex_count);
+	//}
+}
+
 void drawCubeMap(GLuint shaderID, GLuint textureID, mat4 view, mat4 proj, mat4 model, vec3 Ld, vec3 La, EulerCamera cam, Mesh skybox, GLenum mode)
 {
 	glDepthMask(GL_FALSE);

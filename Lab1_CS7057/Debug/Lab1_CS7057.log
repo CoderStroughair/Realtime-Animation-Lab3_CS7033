@@ -43,12 +43,20 @@ u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\particle.h(53): wa
 u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\particle.h(239): warning C4244: 'initializing': conversion from 'double' to 'GLfloat', possible loss of data
 u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\particle.h(300): warning C4305: 'initializing': truncation from 'double' to 'float'
 u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\particle.h(305): warning C4305: 'argument': truncation from 'double' to 'float'
-u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\skeleton.h(57): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\skeleton.h(66): warning C4305: 'argument': truncation from 'double' to 'float'
+u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\skeleton.h(163): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\skeleton.h(167): warning C4305: 'argument': truncation from 'double' to 'float'
+u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\skeleton.h(173): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\skeleton.h(183): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\skeleton.h(193): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\skeleton.h(203): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\skeleton.h(221): warning C4305: '+=': truncation from 'double' to 'float'
+u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\skeleton.h(226): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\skeleton.h(235): warning C4305: '-=': truncation from 'double' to 'float'
+u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\skeleton.h(240): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
 u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\main_mine.cpp(54): warning C4244: 'argument': conversion from 'const float' to 'int', possible loss of data
-u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\main_mine.cpp(72): warning C4244: 'argument': conversion from 'const float' to 'GLsizei', possible loss of data
-u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\main_mine.cpp(234): warning C4244: 'argument': conversion from 'const float' to 'int', possible loss of data
-u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\main_mine.cpp(240): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\main_mine.cpp(261): warning C4305: 'argument': truncation from 'double' to 'float'
+u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\main_mine.cpp(73): warning C4244: 'argument': conversion from 'const float' to 'GLsizei', possible loss of data
+u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\main_mine.cpp(235): warning C4244: 'argument': conversion from 'const float' to 'int', possible loss of data
+u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\main_mine.cpp(241): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+u:\animation labs\realtime-animation -lab3_cs7033\lab1_cs7057\main_mine.cpp(262): warning C4305: 'argument': truncation from 'double' to 'float'
   Lab1_CS7057.vcxproj -> U:\Animation Labs\Realtime-Animation -Lab3_CS7033\Debug\Lab3.exe
   Lab1_CS7057.vcxproj -> U:\Animation Labs\Realtime-Animation -Lab3_CS7033\Debug\Lab3.pdb (Full PDB)

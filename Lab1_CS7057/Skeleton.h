@@ -10,13 +10,16 @@ public:
 	mat4 localTransform;
 	Bone* parent;
 	vector<Bone*> children;
+	bool root = false;
 	Bone();
 	Bone(Mesh m, Bone* parent, mat4 initPosition);
+	Bone(Mesh m, Bone* parent, mat4 initPosition, bool root);
 	void addChild(Bone* child);
 	void drawBone(mat4 projection, mat4 view, mat4 modelGlobal, GLuint shaderID, EulerCamera cam);
 	void bendBone(GLfloat rotation);
 	void rollBone(GLfloat rotation);
 	void pivotBone(GLfloat rotation);
+	bool initialised = false;
 
 private:
 	vec4 up, right, forward;
@@ -26,16 +29,39 @@ private:
 
 Bone::Bone()
 {
-
+	initialised = false;
 }
 
 Bone::Bone(Mesh m, Bone* parent, mat4 initPosition)
 {
+	initialised = true;
+	mesh = m;
 	localTransform = initPosition;
 	this->parent = parent;
+	if (parent)
+		parent->addChild(this);
 	up = vec4(0.0, 1.0, 0.0, 0.0);
 	right = vec4(1.0, 0.0, 0.0, 0.0);
 	forward = vec4(0.0, 0.0, 1.0, 0.0);
+	orientation = quat_from_axis_rad(0, this->right.v[0], this->right.v[1], this->right.v[2]);
+	rotMatrix = identity_mat4();
+}
+
+Bone::Bone(Mesh m, Bone* parent, mat4 initPosition, bool root)
+{
+	if (root)
+		this->root = true;
+	initialised = true;
+	mesh = m;
+	localTransform = initPosition;
+	this->parent = parent;
+	if (parent)
+		parent->addChild(this);
+	up = vec4(0.0, 1.0, 0.0, 0.0);
+	right = vec4(1.0, 0.0, 0.0, 0.0);
+	forward = vec4(0.0, 0.0, 1.0, 0.0);
+	orientation = quat_from_axis_rad(0, this->right.v[0], this->right.v[1], this->right.v[2]);
+	rotMatrix = identity_mat4();
 }
 
 #pragma endregion
@@ -49,12 +75,11 @@ void Bone::drawBone(mat4 projection, mat4 view, mat4 modelGlobal, GLuint shaderI
 {
 	mat4 modelLocal = modelGlobal * localTransform * rotMatrix;
 
-	//draw the mesh here
 	// light properties
 	vec3 Ls = vec3(0.0001f, 0.0001f, 0.0001f);	//Specular Reflected Light
 	vec3 Ld = vec3(0.5f, 0.5f, 0.5f);	//Diffuse Surface Reflectance
 	vec3 La = vec3(1.0f, 1.0f, 1.0f);	//Ambient Reflected Light
-	vec3 light = vec3(5 * sin(0), 10, -5.0f*cos(0));//light source location
+	vec3 light = vec3(5, 10, -5.0f);//light source location
 	vec3 coneDirection = light + vec3(0.0f, -1.0f, 0.0f);
 	float coneAngle = 10.0f;
 	// object colour
@@ -63,7 +88,7 @@ void Bone::drawBone(mat4 projection, mat4 view, mat4 modelGlobal, GLuint shaderI
 	vec3 Ka = BLUE; // ambient reflectance
 	float specular_exponent = 0.000000005f; //specular exponent - size of the specular elements
 
-	drawObject(shaderID, view, projection, modelLocal, light, Ls, La, Ld, Ks, vec3(1.0, 0.0, 1.0), vec3(0.8, 0.0, 0.8), specular_exponent, cam, this->mesh, coneAngle, coneDirection, GL_TRIANGLES);
+	drawObjectDebug(shaderID, view, projection, modelLocal, light, Ls, La, Ld, Ks, Kd, Ka, specular_exponent, cam, mesh, coneAngle, coneDirection, GL_TRIANGLES);
 	
 	
 	for (GLuint i = 0; i < this->children.size(); i++)
@@ -111,26 +136,112 @@ void Bone::pivotBone(GLfloat rotation)
 class Skeleton {
 public:
 	Skeleton();
-	Skeleton(Mesh m);
+	Skeleton(Mesh mRoot, Mesh mFinger);
 	void drawSkeleton(mat4 view, mat4 projection, GLuint shaderID, EulerCamera cam);
+	void bendFingers();
 
-	vector<Bone*> bones;
-	Bone root;
+	Bone* list[15];
+	Bone* root;
+	float radians = 0;
+	bool bend = true;
 };
 
 Skeleton::Skeleton(){}
 
-Skeleton::Skeleton(Mesh m)
+Skeleton::Skeleton(Mesh mRoot, Mesh mFinger)
 {
-	root = Bone(m, nullptr, identity_mat4());
-	for (int i = 0; i < 15; i++)
+	root = new Bone(mRoot, nullptr, identity_mat4(), true);
+
+	//int x = 0;
+	//int y = x + 3;
+
+	//for (int z = 0; z < 5; z++)
+	//{
+	//	mat4 matrix
+	//}
+	//Finger 1
+	mat4 matrix = translate(identity_mat4(), vec3(2.0*cos(ONE_DEG_IN_RAD * 0), 2.0*sin(ONE_DEG_IN_RAD * 0), 0.0));
+	list[0] = new Bone(mFinger, root, matrix);
+	for (int i = 1; i < 3; i++)
 	{
-		mat4 matrix = translate(identity_mat4(), vec3(1.0, 1.0, 0.0));
-		bones.push_back(&Bone(m, &root, matrix));
+		matrix = translate(identity_mat4(), vec3(1.2, 0.0, 0.0));
+		list[i] = new Bone(mFinger, list[i-1], matrix);
+	}
+
+	//Finger 2
+	matrix = rotate_z_deg(identity_mat4(), 45);
+	matrix = translate(matrix, vec3(2.0*cos(ONE_DEG_IN_RAD*45), 2.0*sin(ONE_DEG_IN_RAD*45), 0.0));
+	list[3] = new Bone(mFinger, root, matrix);
+	for (int i = 4; i < 6; i++)
+	{
+		matrix = translate(identity_mat4(), vec3(1.5, 0.0, 0.0));
+		list[i] = new Bone(mFinger, list[i - 1], matrix);
+	}
+
+	//Finger 3
+	matrix = rotate_z_deg(identity_mat4(), 75);
+	matrix = translate(matrix, vec3(2.0*cos(ONE_DEG_IN_RAD * 75), 2.0*sin(ONE_DEG_IN_RAD * 75), 0.0));
+	list[6] = new Bone(mFinger, root, matrix);
+	for (int i = 7; i < 9; i++)
+	{
+		matrix = translate(identity_mat4(), vec3(1.5, 0.0, 0.0));
+		list[i] = new Bone(mFinger, list[i - 1], matrix);
+	}
+
+	//Finger 4
+	matrix = rotate_z_deg(identity_mat4(), 115);
+	matrix = translate(matrix, vec3(2.0*cos(ONE_DEG_IN_RAD * 115), 2.0*sin(ONE_DEG_IN_RAD * 115), 0.0));
+	list[9] = new Bone(mFinger, root, matrix);
+	for (int i = 10; i < 12; i++)
+	{
+		matrix = translate(identity_mat4(), vec3(1.5, 0.0, 0.0));
+		list[i] = new Bone(mFinger, list[i - 1], matrix);
+	}
+
+	//Finger 5
+	matrix = rotate_z_deg(identity_mat4(), 140);
+	matrix = translate(matrix, vec3(2.0*cos(ONE_DEG_IN_RAD * 140), 2.0*sin(ONE_DEG_IN_RAD * 140), 0.0));
+	list[12] = new Bone(mFinger, root, matrix);
+	for (int i = 13; i < 15; i++)
+	{
+		matrix = translate(identity_mat4(), vec3(1.5, 0.0, 0.0));
+		list[i] = new Bone(mFinger, list[i - 1], matrix);
 	}
 }
 
 void Skeleton::drawSkeleton(mat4 view, mat4 projection, GLuint shaderID, EulerCamera cam)
 {
-	root.drawBone(view, projection, identity_mat4(), shaderID, cam);
+	root->drawBone(projection, view, identity_mat4(), shaderID, cam);
+}
+
+void Skeleton::bendFingers()
+{
+	if (bend)
+	{
+		radians += 0.01;
+		for (int i = 0; i < 15; i++)
+		{
+			if (list[i]->root)
+				cout << "";
+			list[i]->pivotBone(0.01);
+		}
+		if (radians > 0.0)
+		{
+			bend = false;
+		}
+	}
+	else
+	{
+		radians -= 0.01;
+		for (int i = 0; i < 15; i++)
+		{
+			if (list[i]->root)
+				cout << "";
+			list[i]->pivotBone(-0.01);
+		}
+		if (radians <= -1.0)
+		{
+			bend = true;
+		}
+	}
 }

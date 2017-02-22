@@ -13,7 +13,7 @@ const float width = 900, height = 900;
 						MESH AND TEXTURE VARIABLES
 ----------------------------------------------------------------------------*/
 
-Mesh cubeMapID, cubeID;
+Mesh cubeMapID, cubeID, torusID;
 
 /*----------------------------------------------------------------------------
 							CAMERA VARIABLES
@@ -62,7 +62,8 @@ void init()
 
 	cubeMapID.initCubeMap(vertices, 36, "desert");
 	cubeID.init(CUBE_MESH);
-	skeleton = Skeleton(cubeID);
+	torusID.init(TORUS_MESH);
+	skeleton = Skeleton(torusID, cubeID);
 }
 
 void display() 
@@ -104,7 +105,7 @@ void updateScene() {
 		update_text(textID, output.c_str());
 		if (!pause)
 		{
-
+			skeleton.bendFingers();
 		}
 	}
 	
