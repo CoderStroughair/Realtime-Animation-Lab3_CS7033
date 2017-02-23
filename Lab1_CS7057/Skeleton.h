@@ -133,96 +133,113 @@ void Bone::pivotBone(GLfloat rotation)
 
 #pragma endregion
 
-class Skeleton {
+class Hand {
 public:
-	Skeleton();
-	Skeleton(Mesh mRoot, Mesh mFinger);
+	Hand();
+	Hand(Mesh mRoot, Mesh mFinger);
 	void drawSkeleton(mat4 view, mat4 projection, GLuint shaderID, EulerCamera cam);
-	void bendFingers();
+	void formFist();
+	void thumbsUp();
+	void oneFinger();
+	void oneJoint();
 
 	Bone* list[15];
-	Bone* root;
+
+	Bone* index[3];
+	Bone* middle[3];
+	Bone* ring[3];
+	Bone* pinky[3];
+	Bone* thumb[3];
+
+	Bone* palm;
 	float radians = 0;
-	bool bend = true;
 };
 
-Skeleton::Skeleton(){}
+Hand::Hand(){}
 
-Skeleton::Skeleton(Mesh mRoot, Mesh mFinger)
+Hand::Hand(Mesh mRoot, Mesh mFinger)
 {
-	root = new Bone(mRoot, nullptr, identity_mat4(), true);
+	palm = new Bone(mRoot, nullptr, identity_mat4(), true);
 
-	//int x = 0;
-	//int y = x + 3;
-
-	//for (int z = 0; z < 5; z++)
-	//{
-	//	mat4 matrix
-	//}
 	//Finger 1
-	mat4 matrix = translate(identity_mat4(), vec3(2.0*cos(ONE_DEG_IN_RAD * 0), 2.0*sin(ONE_DEG_IN_RAD * 0), 0.0));
-	list[0] = new Bone(mFinger, root, matrix);
+	mat4 matrix = rotate_z_deg(identity_mat4(), -15);
+	matrix = translate(matrix, vec3(2.0*cos(ONE_DEG_IN_RAD * -15), 2.0*sin(ONE_DEG_IN_RAD * -15), 0.0));
+	list[0] = new Bone(mFinger, palm, matrix);
+	thumb[0] = list[0];
 	for (int i = 1; i < 3; i++)
 	{
-		matrix = translate(identity_mat4(), vec3(1.2, 0.0, 0.0));
+		matrix = scale(identity_mat4(), vec3(0.9, 0.9, 0.9));
+		matrix = translate(matrix, vec3(1.5, 0.0, 0.0));
 		list[i] = new Bone(mFinger, list[i-1], matrix);
+		thumb[i] = list[i];
 	}
 
 	//Finger 2
 	matrix = rotate_z_deg(identity_mat4(), 45);
 	matrix = translate(matrix, vec3(2.0*cos(ONE_DEG_IN_RAD*45), 2.0*sin(ONE_DEG_IN_RAD*45), 0.0));
-	list[3] = new Bone(mFinger, root, matrix);
+	list[3] = new Bone(mFinger, palm, matrix);
+	index[0] = list[3];
 	for (int i = 4; i < 6; i++)
 	{
-		matrix = translate(identity_mat4(), vec3(1.5, 0.0, 0.0));
+		matrix = scale(identity_mat4(), vec3(0.9, 0.9, 0.9));
+		matrix = translate(matrix, vec3(1.5, 0.0, 0.0));
 		list[i] = new Bone(mFinger, list[i - 1], matrix);
+		index[i - 3] = list[i];
 	}
 
 	//Finger 3
 	matrix = rotate_z_deg(identity_mat4(), 75);
 	matrix = translate(matrix, vec3(2.0*cos(ONE_DEG_IN_RAD * 75), 2.0*sin(ONE_DEG_IN_RAD * 75), 0.0));
-	list[6] = new Bone(mFinger, root, matrix);
+	list[6] = new Bone(mFinger, palm, matrix);
+	middle[0] = list[6];
 	for (int i = 7; i < 9; i++)
 	{
-		matrix = translate(identity_mat4(), vec3(1.5, 0.0, 0.0));
+		matrix = scale(identity_mat4(), vec3(0.9, 0.9, 0.9));
+		matrix = translate(matrix, vec3(1.5, 0.0, 0.0));
 		list[i] = new Bone(mFinger, list[i - 1], matrix);
+		middle[i - 6] = list[i];
 	}
 
 	//Finger 4
 	matrix = rotate_z_deg(identity_mat4(), 115);
 	matrix = translate(matrix, vec3(2.0*cos(ONE_DEG_IN_RAD * 115), 2.0*sin(ONE_DEG_IN_RAD * 115), 0.0));
-	list[9] = new Bone(mFinger, root, matrix);
+	list[9] = new Bone(mFinger, palm, matrix);
+	ring[0] = list[9];
 	for (int i = 10; i < 12; i++)
 	{
-		matrix = translate(identity_mat4(), vec3(1.5, 0.0, 0.0));
+		matrix = scale(identity_mat4(), vec3(0.9, 0.9, 0.9));
+		matrix = translate(matrix, vec3(1.5, 0.0, 0.0));
 		list[i] = new Bone(mFinger, list[i - 1], matrix);
+		ring[i - 9] = list[i];
 	}
 
 	//Finger 5
 	matrix = rotate_z_deg(identity_mat4(), 140);
 	matrix = translate(matrix, vec3(2.0*cos(ONE_DEG_IN_RAD * 140), 2.0*sin(ONE_DEG_IN_RAD * 140), 0.0));
-	list[12] = new Bone(mFinger, root, matrix);
+	list[12] = new Bone(mFinger, palm, matrix);
+	pinky[0] = list[12];
 	for (int i = 13; i < 15; i++)
 	{
-		matrix = translate(identity_mat4(), vec3(1.5, 0.0, 0.0));
+		matrix = scale(identity_mat4(), vec3(0.9, 0.9, 0.9));
+		matrix = translate(matrix, vec3(1.5, 0.0, 0.0));
 		list[i] = new Bone(mFinger, list[i - 1], matrix);
+		pinky[i - 12] = list[i];
 	}
 }
 
-void Skeleton::drawSkeleton(mat4 view, mat4 projection, GLuint shaderID, EulerCamera cam)
+void Hand::drawSkeleton(mat4 view, mat4 projection, GLuint shaderID, EulerCamera cam)
 {
-	root->drawBone(projection, view, identity_mat4(), shaderID, cam);
+	palm->drawBone(projection, view, identity_mat4(), shaderID, cam);
 }
 
-void Skeleton::bendFingers()
+void Hand::formFist()
 {
+	static bool bend = true;
 	if (bend)
 	{
 		radians += 0.01;
 		for (int i = 0; i < 15; i++)
 		{
-			if (list[i]->root)
-				cout << "";
 			list[i]->pivotBone(0.01);
 		}
 		if (radians > 0.0)
@@ -235,10 +252,99 @@ void Skeleton::bendFingers()
 		radians -= 0.01;
 		for (int i = 0; i < 15; i++)
 		{
-			if (list[i]->root)
-				cout << "";
 			list[i]->pivotBone(-0.01);
 		}
+		if (radians <= -1.2)
+		{
+			bend = true;
+		}
+	}
+}
+
+void Hand::thumbsUp()
+{
+	static bool bending = true;
+	if (bending)
+	{
+		radians += 0.01;
+		for (int i = 0; i < 3; i++)
+		{
+			index[i]->pivotBone(0.01);
+			middle[i]->pivotBone(0.01);
+			ring[i]->pivotBone(0.01);
+			pinky[i]->pivotBone(0.01);
+			palm->bendBone(-0.0057);
+		}
+		if (radians >= 0.0)
+		{
+			bending = false;
+		}
+	}
+	else
+	{
+		radians -= 0.01;
+		for (int i = 0; i < 3; i++)
+		{
+			index[i]->pivotBone(-0.01);
+			middle[i]->pivotBone(-0.01);
+			ring[i]->pivotBone(-0.01);
+			pinky[i]->pivotBone(-0.01);
+			palm->bendBone(0.0057);
+		}
+		if (radians <= -1.0)
+		{
+			bending = true;
+		}
+	}
+}
+
+void Hand::oneFinger()
+{
+	static bool bend = true;
+
+	if (bend)
+	{
+		radians += 0.01;
+		for (int i = 0; i < 3; i++)
+		{
+			thumb[i]->pivotBone(0.01);
+		}
+		if (radians > 0.0)
+		{
+			bend = false;
+		}
+	}
+	else
+	{
+		radians -= 0.01;
+		for (int i = 0; i < 3; i++)
+		{
+			thumb[i]->pivotBone(-0.01);
+		}
+		if (radians <= -1.0)
+		{
+			bend = true;
+		}
+	}
+}
+
+void Hand::oneJoint()
+{
+	static bool bend = true;
+
+	if (bend)
+	{
+		radians += 0.01;
+		thumb[0]->pivotBone(0.01);
+		if (radians > 0.0)
+		{
+			bend = false;
+		}
+	}
+	else
+	{
+		radians -= 0.01;
+		thumb[0]->pivotBone(-0.01);
 		if (radians <= -1.0)
 		{
 			bend = true;

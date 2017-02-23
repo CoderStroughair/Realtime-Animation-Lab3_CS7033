@@ -13,7 +13,7 @@ const float width = 900, height = 900;
 						MESH AND TEXTURE VARIABLES
 ----------------------------------------------------------------------------*/
 
-Mesh cubeMapID, cubeID, torusID;
+Mesh cubeMapID, cubeID, palmID;
 
 /*----------------------------------------------------------------------------
 							CAMERA VARIABLES
@@ -39,7 +39,9 @@ const char* atlas_meta = "../freemono.meta";
 float fontSize = 25.0f;
 int textID = -1;
 bool pause = false;
-Skeleton skeleton;
+int mode = 0;
+bool changeMode = false;
+Hand skeleton;
 
 /*----------------------------------------------------------------------------
 						FUNCTION DEFINITIONS
@@ -62,8 +64,8 @@ void init()
 
 	cubeMapID.initCubeMap(vertices, 36, "desert");
 	cubeID.init(CUBE_MESH);
-	torusID.init(TORUS_MESH);
-	skeleton = Skeleton(torusID, cubeID);
+	palmID.init(PALM_MESH);
+	skeleton = Hand(palmID, cubeID);
 }
 
 void display() 
@@ -102,10 +104,27 @@ void updateScene() {
 		output += "Pitch: " + to_string(cam.pitch) + "\n";
 		output += "Yaw: " + to_string(cam.yaw) + "\n";
 		output += "Roll: " + to_string(cam.roll) + "\n";
+		if (changeMode)
+			output += "Changing Modes, please Wait...\n";
 		update_text(textID, output.c_str());
 		if (!pause)
 		{
-			skeleton.bendFingers();
+			if (changeMode && skeleton.radians >=0.0f)
+			{
+				changeMode = false;
+				mode ++;
+				if (mode > 3)
+					mode = 0;
+			}
+
+			if (!mode)
+				skeleton.thumbsUp();
+			else if (mode == 1)
+				skeleton.formFist();
+			else if (mode == 2)
+				skeleton.oneFinger();
+			else
+				skeleton.oneJoint();
 		}
 	}
 	
@@ -219,6 +238,9 @@ void specialKeypressUp(int key, int x, int y){
 	case (GLUT_KEY_UP):
 	case (GLUT_KEY_DOWN):
 		pitCam = 0;
+		break;
+	case(GLUT_KEY_F1):
+		changeMode = true;
 		break;
 	}
 }
